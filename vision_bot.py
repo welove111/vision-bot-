@@ -35,6 +35,8 @@ last_btc_price = None
 last_sol_price = None
 last_visitor_count_btc = 0
 last_visitor_count_sol = 0
+last_btc_visitor_id = None
+last_sol_visitor_id = None
 
 # ═══════════════════════════════════════
 # TELEGRAM
@@ -129,37 +131,43 @@ def get_visitors(sb_url, sb_key, site_name):
         return []
 
 def check_new_visitors():
-    global last_visitor_count_btc, last_visitor_count_sol
+    global last_visitor_count_btc, last_visitor_count_sol, last_btc_visitor_id, last_sol_visitor_id
 
     # BTCvision
     btc_visitors = get_visitors(SB_BTC_URL, SB_BTC_KEY, "BTCvision")
-    if btc_visitors and len(btc_visitors) > last_visitor_count_btc and last_visitor_count_btc > 0:
-        new_count = len(btc_visitors) - last_visitor_count_btc
-        latest = btc_visitors[0]
-        wallet = f"✅ {latest.get('wallet_detected','')}" if latest.get('wallet_detected') and latest.get('wallet_detected') != 'none' else "—"
-        msg = f"""👁️ <b>BTCvision — {new_count} زائر جديد</b>
+    if btc_visitors:
+        latest_id = btc_visitors[0].get('id')
+        if last_btc_visitor_id and latest_id != last_btc_visitor_id:
+            new_count = len(btc_visitors) - last_visitor_count_btc
+            latest = btc_visitors[0]
+            wallet = f"✅ {latest.get('wallet_detected','')}" if latest.get('wallet_detected') and latest.get('wallet_detected') != 'none' else "—"
+            msg = f"""👁️ <b>BTCvision — {new_count} زائر جديد</b>
 
 🌍 {latest.get('country','?')} {f"· {latest.get('city','')}" if latest.get('city') else ''}
 🌐 {latest.get('browser','?')} · {latest.get('device','?')}
 💰 Wallet: {wallet}
 📊 Total: {len(btc_visitors)} زائر"""
-        send_telegram(msg)
-    last_visitor_count_btc = len(btc_visitors) if btc_visitors else last_visitor_count_btc
+            send_telegram(msg)
+        last_btc_visitor_id = latest_id
+        last_visitor_count_btc = len(btc_visitors)
 
     # SolanaVision
     sol_visitors = get_visitors(SB_SOL_URL, SB_SOL_KEY, "SolanaVision")
-    if sol_visitors and len(sol_visitors) > last_visitor_count_sol and last_visitor_count_sol > 0:
-        new_count = len(sol_visitors) - last_visitor_count_sol
-        latest = sol_visitors[0]
-        wallet = f"✅ {latest.get('wallet_detected','')}" if latest.get('wallet_detected') and latest.get('wallet_detected') != 'none' else "—"
-        msg = f"""👁️ <b>SolanaVision — {new_count} زائر جديد</b>
+    if sol_visitors:
+        latest_id = sol_visitors[0].get('id')
+        if last_sol_visitor_id and latest_id != last_sol_visitor_id:
+            new_count = len(sol_visitors) - last_visitor_count_sol
+            latest = sol_visitors[0]
+            wallet = f"✅ {latest.get('wallet_detected','')}" if latest.get('wallet_detected') and latest.get('wallet_detected') != 'none' else "—"
+            msg = f"""👁️ <b>SolanaVision — {new_count} زائر جديد</b>
 
 🌍 {latest.get('country','?')} {f"· {latest.get('city','')}" if latest.get('city') else ''}
 🌐 {latest.get('browser','?')} · {latest.get('device','?')}
 💰 Wallet: {wallet}
 📊 Total: {len(sol_visitors)} زائر"""
-        send_telegram(msg)
-    last_visitor_count_sol = len(sol_visitors) if sol_visitors else last_visitor_count_sol
+            send_telegram(msg)
+        last_sol_visitor_id = latest_id
+        last_visitor_count_sol = len(sol_visitors)
 
 # ═══════════════════════════════════════
 # DAILY REPORT
@@ -233,6 +241,8 @@ def main():
     sol_v = get_visitors(SB_SOL_URL, SB_SOL_KEY, "SolanaVision")
     last_visitor_count_btc = len(btc_v) if btc_v else 0
     last_visitor_count_sol = len(sol_v) if sol_v else 0
+    last_btc_visitor_id = btc_v[0].get('id') if btc_v else None
+    last_sol_visitor_id = sol_v[0].get('id') if sol_v else None
 
     # Initialize prices
     global last_btc_price, last_sol_price
