@@ -133,22 +133,10 @@ def get_visitors(sb_url, sb_key, site_name):
 def check_new_visitors():
     global last_visitor_count_btc, last_visitor_count_sol, last_btc_visitor_id, last_sol_visitor_id
 
-    # BTCvision
+    # BTCvision — visitors handled by index.html directly, skip here
     btc_visitors = get_visitors(SB_BTC_URL, SB_BTC_KEY, "BTCvision")
     if btc_visitors:
-        latest_id = btc_visitors[0].get('id')
-        if last_btc_visitor_id and latest_id != last_btc_visitor_id:
-            new_count = len(btc_visitors) - last_visitor_count_btc
-            latest = btc_visitors[0]
-            wallet = f"✅ {latest.get('wallet_detected','')}" if latest.get('wallet_detected') and latest.get('wallet_detected') != 'none' else "—"
-            msg = f"""👁️ <b>BTCvision — {new_count} زائر جديد</b>
-
-🌍 {latest.get('country','?')} {f"· {latest.get('city','')}" if latest.get('city') else ''}
-🌐 {latest.get('browser','?')} · {latest.get('device','?')}
-💰 Wallet: {wallet}
-📊 Total: {len(btc_visitors)} زائر"""
-            send_telegram(msg)
-        last_btc_visitor_id = latest_id
+        last_btc_visitor_id = btc_visitors[0].get('id')
         last_visitor_count_btc = len(btc_visitors)
 
     # SolanaVision
